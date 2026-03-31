@@ -15,6 +15,12 @@ spring:
     console:
       enabled: true
 
+app:
+  jwt:
+    # Base64 of "test-secret-key-for-testing-only" (32 bytes = 256 bits, minimum for HMAC-SHA256)
+    secret: dGVzdC1zZWNyZXQta2V5LWZvci10ZXN0aW5nLW9ubHk=
+    expiration-ms: 3600000 # 1 hour
+
 logging:
   level:
-    com.workouttracker: DEBUG
+    "[com.workout_tracker]": DEBUG
