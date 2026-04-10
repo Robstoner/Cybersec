@@ -45,6 +45,24 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+// Load .env file from project root into environment for bootRun
+tasks.named('bootRun') {
+	def envFile = rootProject.file('../.env')
+	if (envFile.exists()) {
+		envFile.readLines().each { line ->
+			def trimmed = line.trim()
+			if (trimmed && !trimmed.startsWith('#')) {
+				def idx = trimmed.indexOf('=')
+				if (idx > 0) {
+					def key = trimmed.substring(0, idx).trim()
+					def value = trimmed.substring(idx + 1).trim()
+					environment(key, value)
+				}
+			}
+		}
+	}
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }

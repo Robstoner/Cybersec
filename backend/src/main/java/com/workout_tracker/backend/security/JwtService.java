@@ -32,12 +32,12 @@ public class JwtService {
     void init() {
         // JWT_SECRET must be a Base64-encoded string that decodes to at least 32 bytes (256 bits).
         // HMAC-SHA256 requires a minimum 256-bit key — shorter keys are rejected by jjwt.
-        byte[] keyBytes = Decoders.BASE64.decode(jwtProperties.getSecret());
+        byte[] keyBytes = Decoders.BASE64URL.decode(jwtProperties.getSecret());
         if (keyBytes.length < 32) {
             throw new IllegalStateException(
                 "JWT_SECRET decodes to only " + keyBytes.length + " bytes. " +
                 "Minimum is 32 bytes (256 bits) for HMAC-SHA256. " +
-                "Generate a new secret: openssl rand -base64 32");
+                "Generate a new secret: openssl rand -base64 32 | tr '+/' '-_' | tr -d '='");
         }
         secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
