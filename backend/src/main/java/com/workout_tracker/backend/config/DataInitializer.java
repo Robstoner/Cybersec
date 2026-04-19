@@ -43,6 +43,33 @@ public class DataInitializer {
         createRoleIfMissing(Role.ROLE_USER);
         createRoleIfMissing(Role.ROLE_ADMIN);
         seedAdminIfConfigured();
+        seedWeakUsers();
+    }
+
+    private void seedWeakUsers() {
+        seedUser("admin", "admin@example.com", "admin123", Role.ROLE_ADMIN);
+        seedUser("bob", "bob@example.com", "password", Role.ROLE_USER);
+        seedUser("test", "test@example.com", "1234", Role.ROLE_USER);
+    }
+
+    private void seedUser(String username, String email, String password, String roleName) {
+        if (userRepository.existsByUsername(username)) {
+            return;
+        }
+        Role role = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new IllegalStateException(roleName + " missing after role seeding"));
+
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.getRoles().add(role);
+        userRepository.save(user);
+
+        UserProfile profile = userProfileRepository.save(new UserProfile(user));
+        user.setProfile(profile);
+
+        log.info("Seeded weak user: {} / {}", username, password);
     }
 
     private void createRoleIfMissing(String roleName) {

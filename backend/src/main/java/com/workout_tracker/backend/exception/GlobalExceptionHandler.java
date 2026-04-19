@@ -27,14 +27,11 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", ex.getMessage()));
     }
 
-    // Wrong username or password — covers BadCredentialsException and other auth failures.
-    // Generic message intentional: don't reveal whether username or password was wrong
-    // (prevents username enumeration attacks).
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Map<String, String>> handleAuthenticationException(AuthenticationException ex) {
         log.warn("Failed login attempt: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("error", "Invalid username or password"));
+                .body(Map.of("error", ex.getMessage()));
     }
 
     // Permission denied (e.g. user trying to delete someone else's post)
