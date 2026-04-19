@@ -26,6 +26,14 @@ export function DashboardPage() {
           >
             Edit Profile
           </Link>
+          {user!.roles.includes('ROLE_ADMIN') && (
+            <Link
+              to="/admin"
+              className="bg-purple-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-purple-700 transition-colors"
+            >
+              Admin Panel
+            </Link>
+          )}
           <button
             onClick={handleLogout}
             className="bg-red-500 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-red-600 transition-colors"
