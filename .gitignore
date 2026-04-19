@@ -17,6 +17,10 @@ frontend/node_modules/
 frontend/dist/
 frontend/.vite/
 
+# Uploaded user content
+backend/uploads/
+uploads/
+
 # Secrets
 .env
 

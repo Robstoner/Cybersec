@@ -5,7 +5,8 @@ export function extractErrorMessage(err: unknown, fallback: string): string {
     if (!err.response) {
       return 'Could not reach the server. Check your connection.'
     }
-    return err.response.data?.message ?? fallback
+    const data = err.response.data
+    return data?.error ?? data?.message ?? fallback
   }
   return fallback
 }

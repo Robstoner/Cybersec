@@ -22,3 +22,6 @@ app:
   cors:
     # Override with CORS_ALLOWED_ORIGINS env var in production (comma-separated URLs)
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:*,http://127.0.0.1:*}
+  storage:
+    # Path (relative to CWD) where uploaded post images are stored. Override with UPLOAD_DIR.
+    upload-dir: ${UPLOAD_DIR:./uploads}

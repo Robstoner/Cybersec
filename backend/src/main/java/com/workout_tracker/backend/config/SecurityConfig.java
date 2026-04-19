@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -77,6 +78,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
+                // Uploaded post images are served as plain static files — public by design
+                // so <img src="/uploads/..."> works without auth headers.
+                .requestMatchers("/uploads/**").permitAll()
+                // Browsing the feed is public; posting/commenting/deleting still require auth.
+                .requestMatchers(HttpMethod.GET, "/api/posts", "/api/posts/*").permitAll()
                 .anyRequest().authenticated()
             )
             // Return 401 (not 403) when a request hits a protected endpoint with no token.

@@ -18,7 +18,7 @@ export function LoginPage() {
     setIsSubmitting(true)
     try {
       await login({ username, password })
-      navigate('/')
+      navigate('/home')
     } catch (err) {
       setPassword('')
       setError(extractErrorMessage(err, 'Invalid username or password.'))
