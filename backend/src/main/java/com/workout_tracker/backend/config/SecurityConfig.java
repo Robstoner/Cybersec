@@ -52,7 +52,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         // Split comma-separated list so multiple origins work in production
         // trim() handles "url1, url2" (space after comma) so CORS checks don't silently fail
-        config.setAllowedOrigins(Arrays.stream(corsAllowedOrigins.split(","))
+        config.setAllowedOriginPatterns(Arrays.stream(corsAllowedOrigins.split(","))
                 .map(String::trim)
                 .toList());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));

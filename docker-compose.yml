@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:17-alpine
-    container_name: workouttracker-db
+    container_name: workouttracker-db2
     environment:
       POSTGRES_DB: workouttracker
       POSTGRES_USER: postgres

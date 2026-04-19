@@ -21,4 +21,4 @@ app:
     expiration-ms: 86400000 # 24 hours
   cors:
     # Override with CORS_ALLOWED_ORIGINS env var in production (comma-separated URLs)
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:*,http://127.0.0.1:*}
