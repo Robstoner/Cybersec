@@ -28,6 +28,11 @@ public class PostController {
         return postService.listFeed();
     }
 
+    @GetMapping("/search")
+    public List<PostResponse> search(@RequestParam("q") String q) {
+        return postService.searchPosts(q);
+    }
+
     @GetMapping("/{id}")
     public PostResponse get(@PathVariable Long id) {
         return postService.getPost(id);

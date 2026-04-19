@@ -1,7 +1,7 @@
 import { useEffect, useState, type SubmitEvent, type ChangeEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../hooks/useAuth'
-import { listPosts, createPost, deletePost } from '../api/posts'
+import { listPosts, searchPosts, createPost, deletePost } from '../api/posts'
 import type { Post } from '../types/post'
 import { extractErrorMessage } from '../utils/errors'
 
@@ -19,12 +19,31 @@ export function FeedPage() {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
+  const [searchQuery, setSearchQuery] = useState('')
+
   async function loadFeed() {
     try {
       setLoadError(null)
       setPosts(await listPosts())
     } catch (err) {
       setLoadError(extractErrorMessage(err, 'Failed to load the feed.'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleSearch(e: SubmitEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setLoading(true)
+    try {
+      setLoadError(null)
+      if (searchQuery.trim() === '') {
+        setPosts(await listPosts())
+      } else {
+        setPosts(await searchPosts(searchQuery))
+      }
+    } catch (err) {
+      setLoadError(extractErrorMessage(err, 'Search failed.'))
     } finally {
       setLoading(false)
     }
@@ -152,6 +171,24 @@ export function FeedPage() {
             </p>
           </section>
         )}
+
+        <section className="bg-white rounded-2xl shadow p-4">
+          <form onSubmit={handleSearch} className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Search posts by title…"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="submit"
+              className="bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              Search
+            </button>
+          </form>
+        </section>
 
         {loading && <p className="text-sm text-gray-500">Loading…</p>}
         {loadError && (
