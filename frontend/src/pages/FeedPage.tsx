@@ -221,7 +221,11 @@ export function FeedPage() {
             <p className="text-xs text-gray-500 mb-3">
               by {post.author} · {new Date(post.createdAt).toLocaleString()}
             </p>
-            <p className="text-sm text-gray-700 whitespace-pre-wrap mb-3">{post.body}</p>
+            <div
+              className="text-sm text-gray-700 whitespace-pre-wrap mb-3"
+              dangerouslySetInnerHTML={{ __html: post.body }}
+            />
+
             {post.imageUrl && (
               <img
                 src={post.imageUrl}
