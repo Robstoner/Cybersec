@@ -1,5 +1,5 @@
 import { useAuth } from '../hooks/useAuth'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 
 export function DashboardPage() {
   const { user, logout } = useAuth()
@@ -19,12 +19,20 @@ export function DashboardPage() {
         <p className="text-sm text-gray-500 mb-6">
           Roles: {user!.roles.join(', ') || 'None'}
         </p>
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-red-600 transition-colors"
-        >
-          Log out
-        </button>
+        <div className="flex flex-col gap-3">
+          <Link
+            to="/profile"
+            className="bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
+            Edit Profile
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-red-600 transition-colors"
+          >
+            Log out
+          </button>
+        </div>
       </div>
     </div>
   )
