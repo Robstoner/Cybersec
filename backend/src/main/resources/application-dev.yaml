@@ -13,5 +13,5 @@ spring:
 
 logging:
   level:
-    com.workouttracker: DEBUG
-    org.springframework.security: DEBUG
+    "[com.workout_tracker]": DEBUG
+    "[org.springframework.security]": DEBUG
