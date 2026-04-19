@@ -81,6 +81,7 @@ public class SecurityConfig {
                 // Uploaded post images are served as plain static files — public by design
                 // so <img src="/uploads/..."> works without auth headers.
                 .requestMatchers("/uploads/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/files").permitAll()
                 // Browsing the feed is public; posting/commenting/deleting still require auth.
                 .requestMatchers(HttpMethod.GET, "/api/posts", "/api/posts/*", "/api/posts/search").permitAll()
                 .anyRequest().authenticated()

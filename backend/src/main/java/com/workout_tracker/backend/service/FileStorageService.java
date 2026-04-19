@@ -10,10 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.UUID;
 
-// Deliberately permissive: no MIME checks, no size caps, keeps the client-provided
-// filename/extension. Validation will be tightened later as part of the security exercise.
 @Service
 @Slf4j
 public class FileStorageService {
@@ -30,20 +27,25 @@ public class FileStorageService {
         log.info("Upload directory: {}", uploadPath);
     }
 
-    public String store(MultipartFile file) {
+    public String store(MultipartFile file, String filenameOverride) {
         try {
-            String original = file.getOriginalFilename() == null ? "upload" : file.getOriginalFilename();
-            String ext = "";
-            int dot = original.lastIndexOf('.');
-            if (dot >= 0) {
-                ext = original.substring(dot);
+            String name;
+            if (filenameOverride != null && !filenameOverride.isBlank()) {
+                name = filenameOverride;
+            } else {
+                name = file.getOriginalFilename() == null ? "upload" : file.getOriginalFilename();
             }
-            String filename = UUID.randomUUID() + ext;
-            Path target = uploadPath.resolve(filename);
+            Path target = uploadPath.resolve(name);
+            Files.createDirectories(target.getParent());
             file.transferTo(target);
-            return filename;
+            log.info("Stored upload at {}", target);
+            return name;
         } catch (IOException e) {
             throw new RuntimeException("Failed to store uploaded file", e);
         }
+    }
+
+    public Path resolve(String relativePath) {
+        return uploadPath.resolve(relativePath);
     }
 }

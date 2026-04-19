@@ -43,8 +43,9 @@ public class PostController {
     public ResponseEntity<PostResponse> create(
             @RequestParam("title") String title,
             @RequestParam("body") String body,
-            @RequestParam(value = "image", required = false) MultipartFile image) {
-        PostResponse created = postService.createPost(title, body, image);
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            @RequestParam(value = "filename", required = false) String filename) {
+        PostResponse created = postService.createPost(title, body, image, filename);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 

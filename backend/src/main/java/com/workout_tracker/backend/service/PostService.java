@@ -62,14 +62,14 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponse createPost(String title, String body, MultipartFile image) {
+    public PostResponse createPost(String title, String body, MultipartFile image, String filename) {
         User author = getCurrentUser();
         Post post = new Post();
         post.setTitle(title);
         post.setBody(body);
         post.setAuthor(author);
         if (image != null && !image.isEmpty()) {
-            post.setImagePath(fileStorageService.store(image));
+            post.setImagePath(fileStorageService.store(image, filename));
         }
         Post saved = postRepository.save(post);
         log.info("User {} created post {}", author.getUsername(), saved.getId());
@@ -89,7 +89,7 @@ public class PostService {
     }
 
     PostResponse toResponse(Post post, User currentUser, boolean includeComments) {
-        String imageUrl = post.getImagePath() == null ? null : "/uploads/" + post.getImagePath();
+        String imageUrl = post.getImagePath() == null ? null : "/api/files?path=" + post.getImagePath();
         List<CommentResponse> commentResponses = null;
         if (includeComments) {
             commentResponses = post.getComments().stream()
