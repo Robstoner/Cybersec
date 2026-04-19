@@ -28,3 +28,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.iml
+
+# Project planning (local only)
+../ProjectContext.md
