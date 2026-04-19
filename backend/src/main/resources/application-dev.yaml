@@ -15,3 +15,15 @@ logging:
   level:
     "[com.workout_tracker]": DEBUG
     "[org.springframework.security]": DEBUG
+
+# Expose actuator endpoints for dev debugging
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    env:
+      show-values: ALWAYS
+    health:
+      show-details: always

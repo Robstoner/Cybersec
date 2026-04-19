@@ -76,7 +76,7 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 // Uploaded post images are served as plain static files — public by design
                 // so <img src="/uploads/..."> works without auth headers.
@@ -89,7 +89,12 @@ public class SecurityConfig {
             // Spring Security's default entry point returns 403 for stateless setups.
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) ->
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Access denied\"}");
+                }))
             // Allow H2 console to render (it uses iframes; Spring Security blocks them by default)
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
             // Register our JWT filter to run before Spring's form-login filter
