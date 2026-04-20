@@ -1,29 +1,17 @@
-import { createBrowserRouter, RouterProvider, Navigate, Outlet } from 'react-router'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router'
 import { AuthProvider } from './context/AuthContext'
-import { ProtectedRoute } from './components/ProtectedRoute'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
-import { DashboardPage } from './pages/DashboardPage'
-import { ProfilePage } from './pages/ProfilePage'
-import { AdminPage } from './pages/AdminPage'
+import { FeedPage } from './pages/FeedPage'
+import { PostDetailPage } from './pages/PostDetailPage'
 
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
-  {
-    path: '/',
-    element: (
-      <ProtectedRoute>
-        <Outlet />
-      </ProtectedRoute>
-    ),
-    children: [
-      { index: true, element: <DashboardPage /> },
-      { path: 'profile', element: <ProfilePage /> },
-      { path: 'admin', element: <AdminPage /> },
-    ],
-  },
-  { path: '*', element: <Navigate to="/" replace /> },
+  { path: '/home', element: <FeedPage /> },
+  { path: '/posts/:id', element: <PostDetailPage /> },
+  { path: '/', element: <Navigate to="/home" replace /> },
+  { path: '*', element: <Navigate to="/home" replace /> },
 ])
 
 function App() {
