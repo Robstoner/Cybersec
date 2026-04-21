@@ -6,6 +6,7 @@ import { FeedPage } from './pages/FeedPage'
 import { PostDetailPage } from './pages/PostDetailPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { AdminPage } from './pages/AdminPage'
 
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -19,6 +20,14 @@ const router = createBrowserRouter([
         <ProfilePage />
       </ProtectedRoute>
     ),
+  },
+  {
+    path: '/admin/users',
+    element: (
+      <ProtectedRoute admin>
+        <AdminPage />
+      </ProtectedRoute>
+    )
   },
   { path: '/', element: <Navigate to="/home" replace /> },
   { path: '*', element: <Navigate to="/home" replace /> },

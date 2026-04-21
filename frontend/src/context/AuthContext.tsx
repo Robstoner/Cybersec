@@ -6,6 +6,7 @@ import { STORAGE_KEYS } from '../constants/storage'
 interface AuthContextValue {
   user: AuthUser | null
   isLoading: boolean
+  isAdmin?: boolean
   login: (data: LoginRequest) => Promise<void>
   register: (data: RegisterRequest) => Promise<void>
   logout: () => void
@@ -39,6 +40,7 @@ function isValidAuthUser(obj: unknown): obj is AuthUser {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem(STORAGE_KEYS.TOKEN)
@@ -48,6 +50,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const parsed = JSON.parse(stored)
         if (isValidAuthUser(parsed)) {
           setUser(parsed)
+          if (parsed.roles.includes("ROLE_ADMIN")) {
+            setIsAdmin(true);
+          }
         } else {
           clearStorage()
         }
@@ -86,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, isAdmin, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   )

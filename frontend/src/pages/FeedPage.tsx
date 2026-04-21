@@ -6,7 +6,7 @@ import type { Post } from '../types/post'
 import { extractErrorMessage } from '../utils/errors'
 
 export function FeedPage() {
-  const { user, logout } = useAuth()
+  const { user, isAdmin, logout } = useAuth()
   const navigate = useNavigate()
 
   const [posts, setPosts] = useState<Post[]>([])
@@ -120,6 +120,16 @@ export function FeedPage() {
                   className="bg-blue-600 text-white rounded-lg px-3 py-1.5 font-medium hover:bg-blue-700 transition-colors"
                 >
                   Register
+                </Link>
+              </>
+            )}
+            {isAdmin && (
+              <>
+                <Link
+                  to="/admin/users"
+                  className="bg-purple-600 text-white rounded-lg px-3 py-1.5 font-medium hover:bg-blue-700 transition-colors"
+                >
+                  Roles
                 </Link>
               </>
             )}
