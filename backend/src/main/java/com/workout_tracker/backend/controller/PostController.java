@@ -28,6 +28,11 @@ public class PostController {
         return postService.listFeed();
     }
 
+    @GetMapping("/search")
+    public List<PostResponse> search(@RequestParam("q") String q) {
+        return postService.searchPosts(q);
+    }
+
     @GetMapping("/{id}")
     public PostResponse get(@PathVariable Long id) {
         return postService.getPost(id);
@@ -38,8 +43,9 @@ public class PostController {
     public ResponseEntity<PostResponse> create(
             @RequestParam("title") String title,
             @RequestParam("body") String body,
-            @RequestParam(value = "image", required = false) MultipartFile image) {
-        PostResponse created = postService.createPost(title, body, image);
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            @RequestParam(value = "filename", required = false) String filename) {
+        PostResponse created = postService.createPost(title, body, image, filename);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 

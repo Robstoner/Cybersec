@@ -74,10 +74,17 @@ public class AuthService {
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        // AuthenticationManager checks the password against the BCrypt hash.
-        // Throws BadCredentialsException if wrong — caught by GlobalExceptionHandler → 401.
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.username(), request.password()));
+        if (!userRepository.existsByUsername(request.username())) {
+            throw new org.springframework.security.authentication.BadCredentialsException(
+                    "User '" + request.username() + "' does not exist");
+        }
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.username(), request.password()));
+        } catch (org.springframework.security.authentication.BadCredentialsException ex) {
+            throw new org.springframework.security.authentication.BadCredentialsException(
+                    "Wrong password for user '" + request.username() + "'");
+        }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.username());
         String token = jwtService.generateToken(userDetails);

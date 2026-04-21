@@ -10,6 +10,7 @@ import com.workout_tracker.backend.repository.PostRepository;
 import com.workout_tracker.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -29,11 +30,26 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+    private final JdbcTemplate jdbcTemplate;
 
     @Transactional(readOnly = true)
     public List<PostResponse> listFeed() {
         Optional<User> currentUser = getCurrentUserOptional();
         return postRepository.findAllByOrderByCreatedAtDesc().stream()
+                .map(p -> toResponse(p, currentUser.orElse(null), false))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostResponse> searchPosts(String query) {
+        String sql = "SELECT id FROM posts WHERE title LIKE '%" + query + "%' ORDER BY created_at DESC";
+        log.info("Executing search SQL: {}", sql);
+        List<Long> ids = jdbcTemplate.queryForList(sql, Long.class);
+        Optional<User> currentUser = getCurrentUserOptional();
+        return ids.stream()
+                .map(postRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .map(p -> toResponse(p, currentUser.orElse(null), false))
                 .toList();
     }
@@ -46,14 +62,14 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponse createPost(String title, String body, MultipartFile image) {
+    public PostResponse createPost(String title, String body, MultipartFile image, String filename) {
         User author = getCurrentUser();
         Post post = new Post();
         post.setTitle(title);
         post.setBody(body);
         post.setAuthor(author);
         if (image != null && !image.isEmpty()) {
-            post.setImagePath(fileStorageService.store(image));
+            post.setImagePath(fileStorageService.store(image, filename));
         }
         Post saved = postRepository.save(post);
         log.info("User {} created post {}", author.getUsername(), saved.getId());
@@ -73,7 +89,7 @@ public class PostService {
     }
 
     PostResponse toResponse(Post post, User currentUser, boolean includeComments) {
-        String imageUrl = post.getImagePath() == null ? null : "/uploads/" + post.getImagePath();
+        String imageUrl = post.getImagePath() == null ? null : "/api/files?path=" + post.getImagePath();
         List<CommentResponse> commentResponses = null;
         if (includeComments) {
             commentResponses = post.getComments().stream()

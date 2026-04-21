@@ -27,14 +27,11 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", ex.getMessage()));
     }
 
-    // Wrong username or password — covers BadCredentialsException and other auth failures.
-    // Generic message intentional: don't reveal whether username or password was wrong
-    // (prevents username enumeration attacks).
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Map<String, String>> handleAuthenticationException(AuthenticationException ex) {
         log.warn("Failed login attempt: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("error", "Invalid username or password"));
+                .body(Map.of("error", ex.getMessage()));
     }
 
     // Permission denied (e.g. user trying to delete someone else's post)
@@ -61,13 +58,6 @@ public class GlobalExceptionHandler {
             errors.put(fieldError.getField(), fieldError.getDefaultMessage());
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
-    }
-
-    // Insufficient role — e.g. non-admin hitting /api/admin/** endpoints
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, String>> handleAccessDeniedException(AccessDeniedException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Map.of("error", "Access denied"));
     }
 
     // Bad request — invalid ID, missing resource, etc.

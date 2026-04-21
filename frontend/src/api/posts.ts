@@ -6,6 +6,11 @@ export async function listPosts(): Promise<Post[]> {
   return response.data
 }
 
+export async function searchPosts(q: string): Promise<Post[]> {
+  const response = await apiClient.get<Post[]>('/posts/search', { params: { q } })
+  return response.data
+}
+
 export async function getPost(id: number): Promise<Post> {
   const response = await apiClient.get<Post>(`/posts/${id}`)
   return response.data
