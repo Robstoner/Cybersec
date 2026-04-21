@@ -99,6 +99,12 @@ export function FeedPage() {
             {user ? (
               <>
                 <span className="text-gray-500">{user.username}</span>
+                <Link
+                  to="/profile"
+                  className="bg-blue-600 text-white rounded-lg px-3 py-1.5 font-medium hover:bg-blue-700 transition-colors"
+                >
+                  Profile
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="bg-red-500 text-white rounded-lg px-3 py-1.5 font-medium hover:bg-red-600 transition-colors"

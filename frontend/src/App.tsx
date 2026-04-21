@@ -4,12 +4,22 @@ import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { FeedPage } from './pages/FeedPage'
 import { PostDetailPage } from './pages/PostDetailPage'
+import { ProfilePage } from './pages/ProfilePage'
+import { ProtectedRoute } from './components/ProtectedRoute'
 
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
   { path: '/home', element: <FeedPage /> },
   { path: '/posts/:id', element: <PostDetailPage /> },
+  {
+    path: '/profile',
+    element: (
+      <ProtectedRoute>
+        <ProfilePage />
+      </ProtectedRoute>
+    ),
+  },
   { path: '/', element: <Navigate to="/home" replace /> },
   { path: '*', element: <Navigate to="/home" replace /> },
 ])
