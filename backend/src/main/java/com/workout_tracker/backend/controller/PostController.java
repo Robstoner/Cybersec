@@ -7,12 +7,14 @@ import com.workout_tracker.backend.service.CommentService;
 import com.workout_tracker.backend.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -29,8 +31,18 @@ public class PostController {
     }
 
     @GetMapping("/search")
-    public List<PostResponse> search(@RequestParam("q") String q) {
-        return postService.searchPosts(q);
+    public List<PostResponse> search(
+            @RequestParam(value = "q", required = false) String q,
+            @RequestParam(value = "author", required = false) String author,
+            @RequestParam(value = "sort", required = false, defaultValue = "newest") String sort,
+            @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return postService.searchPosts(q, author, sort, from, to);
+    }
+
+    @GetMapping("/authors")
+    public List<String> authors() {
+        return postService.listAuthors();
     }
 
     @GetMapping("/{id}")

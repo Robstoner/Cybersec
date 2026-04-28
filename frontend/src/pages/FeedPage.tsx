@@ -1,7 +1,7 @@
 import { useEffect, useState, type SubmitEvent, type ChangeEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../hooks/useAuth'
-import { listPosts, searchPosts, createPost, deletePost } from '../api/posts'
+import { listPosts, listAuthors, searchPosts, createPost, deletePost } from '../api/posts'
 import type { Post } from '../types/post'
 import { extractErrorMessage } from '../utils/errors'
 
@@ -20,6 +20,11 @@ export function FeedPage() {
   const [submitting, setSubmitting] = useState(false)
 
   const [searchQuery, setSearchQuery] = useState('')
+  const [authorFilter, setAuthorFilter] = useState('')
+  const [sortFilter, setSortFilter] = useState<'newest' | 'oldest'>('newest')
+  const [fromFilter, setFromFilter] = useState('')
+  const [toFilter, setToFilter] = useState('')
+  const [authors, setAuthors] = useState<string[]>([])
 
   async function loadFeed() {
     try {
@@ -32,15 +37,31 @@ export function FeedPage() {
     }
   }
 
+  function filtersAreEmpty() {
+    return (
+      searchQuery.trim() === '' &&
+      authorFilter === '' &&
+      sortFilter === 'newest' &&
+      fromFilter === '' &&
+      toFilter === ''
+    )
+  }
+
   async function handleSearch(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
     try {
       setLoadError(null)
-      if (searchQuery.trim() === '') {
+      if (filtersAreEmpty()) {
         setPosts(await listPosts())
       } else {
-        setPosts(await searchPosts(searchQuery))
+        setPosts(await searchPosts({
+          q: searchQuery.trim() || undefined,
+          author: authorFilter || undefined,
+          sort: sortFilter,
+          from: fromFilter || undefined,
+          to: toFilter || undefined,
+        }))
       }
     } catch (err) {
       setLoadError(extractErrorMessage(err, 'Search failed.'))
@@ -49,8 +70,28 @@ export function FeedPage() {
     }
   }
 
+  async function handleClearFilters() {
+    setSearchQuery('')
+    setAuthorFilter('')
+    setSortFilter('newest')
+    setFromFilter('')
+    setToFilter('')
+    setLoading(true)
+    try {
+      setLoadError(null)
+      setPosts(await listPosts())
+    } catch (err) {
+      setLoadError(extractErrorMessage(err, 'Failed to load the feed.'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     loadFeed()
+    listAuthors()
+      .then(setAuthors)
+      .catch(() => { /* dropdown is non-critical; silently fall back to empty */ })
   }, [])
 
   function handleLogout() {
@@ -189,20 +230,69 @@ export function FeedPage() {
         )}
 
         <section className="bg-white rounded-2xl shadow p-4">
-          <form onSubmit={handleSearch} className="flex gap-2">
+          <form onSubmit={handleSearch} className="space-y-3">
             <input
               type="text"
               placeholder="Search posts by title…"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <button
-              type="submit"
-              className="bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition-colors"
-            >
-              Search
-            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <select
+                value={authorFilter}
+                onChange={e => setAuthorFilter(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                <option value="">All authors</option>
+                {authors.map(a => (
+                  <option key={a} value={a}>{a}</option>
+                ))}
+              </select>
+              <select
+                value={sortFilter}
+                onChange={e => setSortFilter(e.target.value as 'newest' | 'oldest')}
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">From</label>
+                <input
+                  type="date"
+                  value={fromFilter}
+                  onChange={e => setFromFilter(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">To</label>
+                <input
+                  type="date"
+                  value={toFilter}
+                  onChange={e => setToFilter(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition-colors"
+              >
+                Apply filters
+              </button>
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="bg-gray-100 text-gray-700 rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-200 transition-colors"
+              >
+                Clear
+              </button>
+            </div>
           </form>
         </section>
 

@@ -19,8 +19,12 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -41,17 +45,46 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponse> searchPosts(String query) {
-        String sql = "SELECT id FROM posts WHERE title LIKE '%" + query + "%' ORDER BY created_at DESC";
-        log.info("Executing search SQL: {}", sql);
-        List<Long> ids = jdbcTemplate.queryForList(sql, Long.class);
+    public List<PostResponse> searchPosts(String query, String author, String sort, LocalDate from, LocalDate to) {
+        List<Post> posts;
+        if (query != null && !query.isBlank()) {
+            String sql = "SELECT id FROM posts WHERE title LIKE '%" + query + "%' ORDER BY created_at DESC";
+            log.info("Executing search SQL: {}", sql);
+            List<Long> ids = jdbcTemplate.queryForList(sql, Long.class);
+            posts = new ArrayList<>();
+            for (Long id : ids) {
+                postRepository.findById(id).ifPresent(posts::add);
+            }
+        } else {
+            posts = new ArrayList<>(postRepository.findAll());
+        }
+
+        Stream<Post> stream = posts.stream();
+        if (author != null && !author.isBlank()) {
+            stream = stream.filter(p -> p.getAuthor().getUsername().equalsIgnoreCase(author));
+        }
+        if (from != null) {
+            stream = stream.filter(p -> !p.getCreatedAt().toLocalDate().isBefore(from));
+        }
+        if (to != null) {
+            stream = stream.filter(p -> !p.getCreatedAt().toLocalDate().isAfter(to));
+        }
+
+        Comparator<Post> cmp = Comparator.comparing(Post::getCreatedAt);
+        if (!"oldest".equalsIgnoreCase(sort)) {
+            cmp = cmp.reversed();
+        }
+        List<Post> sorted = stream.sorted(cmp).toList();
+
         Optional<User> currentUser = getCurrentUserOptional();
-        return ids.stream()
-                .map(postRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+        return sorted.stream()
                 .map(p -> toResponse(p, currentUser.orElse(null), false))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> listAuthors() {
+        return postRepository.findDistinctAuthorUsernames();
     }
 
     @Transactional(readOnly = true)

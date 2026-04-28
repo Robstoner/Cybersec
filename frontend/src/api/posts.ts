@@ -6,8 +6,27 @@ export async function listPosts(): Promise<Post[]> {
   return response.data
 }
 
-export async function searchPosts(q: string): Promise<Post[]> {
-  const response = await apiClient.get<Post[]>('/posts/search', { params: { q } })
+export interface PostFilters {
+  q?: string
+  author?: string
+  sort?: 'newest' | 'oldest'
+  from?: string
+  to?: string
+}
+
+export async function searchPosts(filters: PostFilters): Promise<Post[]> {
+  const params: Record<string, string> = {}
+  if (filters.q) params.q = filters.q
+  if (filters.author) params.author = filters.author
+  if (filters.sort) params.sort = filters.sort
+  if (filters.from) params.from = filters.from
+  if (filters.to) params.to = filters.to
+  const response = await apiClient.get<Post[]>('/posts/search', { params })
+  return response.data
+}
+
+export async function listAuthors(): Promise<string[]> {
+  const response = await apiClient.get<string[]>('/posts/authors')
   return response.data
 }
 
