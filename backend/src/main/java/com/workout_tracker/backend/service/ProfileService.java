@@ -12,8 +12,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +44,8 @@ public class ProfileService {
                 profile != null ? profile.getHeightCm() : null,
                 profile != null ? profile.getWeightKg() : null,
                 profile != null ? profile.getGender() : null,
-                profile != null ? profile.getFitnessGoal() : null
+                profile != null ? profile.getFitnessGoal() : null,
+                profile != null ? profile.getAvatarUrl() : null
         );
     }
 
@@ -68,6 +74,7 @@ public class ProfileService {
         if (request.weightKg() != null) profile.setWeightKg(request.weightKg());
         if (request.gender() != null) profile.setGender(request.gender());
         if (request.fitnessGoal() != null) profile.setFitnessGoal(request.fitnessGoal());
+        if (request.avatarUrl() != null) profile.setAvatarUrl(request.avatarUrl());
 
         // Update roles if provided
         if (request.roles() != null && !request.roles().isEmpty()) {
@@ -92,7 +99,35 @@ public class ProfileService {
                 profile.getHeightCm(),
                 profile.getWeightKg(),
                 profile.getGender(),
-                profile.getFitnessGoal()
+                profile.getFitnessGoal(),
+                profile.getAvatarUrl()
         );
+    }
+
+    // Fetches the given URL server-side and stores it as the user's avatar URL.
+    // No scheme or host validation — intentionally vulnerable to SSRF.
+    @Transactional
+    public String fetchAndSetAvatar(String username, String urlStr) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        UserProfile profile = user.getProfile();
+        if (profile == null) {
+            profile = new UserProfile(user);
+            user.setProfile(profile);
+        }
+
+        try {
+            URL url = new URL(urlStr);
+            try (InputStream is = url.openStream();
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+                String content = reader.lines().collect(Collectors.joining("\n"));
+                profile.setAvatarUrl(urlStr);
+                userRepository.save(user);
+                return content;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch URL: " + e.getMessage());
+        }
     }
 }

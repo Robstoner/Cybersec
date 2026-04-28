@@ -19,5 +19,7 @@ public record UpdateProfileRequest(
         String fitnessGoal,
 
         // Used by admin panel to manage user roles
-        List<String> roles
+        List<String> roles,
+
+        String avatarUrl
 ) {}

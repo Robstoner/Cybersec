@@ -8,6 +8,7 @@ export interface ProfileResponse {
   weightKg: number | null
   gender: string | null
   fitnessGoal: string | null
+  avatarUrl: string | null
 }
 
 export interface UpdateProfileRequest {
@@ -17,4 +18,5 @@ export interface UpdateProfileRequest {
   weightKg?: number
   gender?: string
   fitnessGoal?: string
+  avatarUrl?: string
 }

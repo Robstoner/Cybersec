@@ -1,6 +1,6 @@
 import { useState, useEffect, type SubmitEvent } from 'react'
 import { Link } from 'react-router'
-import { getProfile, updateProfile } from '../api/profile'
+import { getProfile, updateProfile, fetchAvatar } from '../api/profile'
 import { extractErrorMessage } from '../utils/errors'
 import type { ProfileResponse } from '../types/profile'
 
@@ -12,6 +12,9 @@ export function ProfilePage() {
   const [weightKg, setWeightKg] = useState('')
   const [gender, setGender] = useState('')
   const [fitnessGoal, setFitnessGoal] = useState('')
+  const [avatarUrl, setAvatarUrl] = useState('')
+  const [avatarFetchContent, setAvatarFetchContent] = useState<string | null>(null)
+  const [isFetching, setIsFetching] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -27,6 +30,7 @@ export function ProfilePage() {
         setWeightKg(data.weightKg?.toString() ?? '')
         setGender(data.gender ?? '')
         setFitnessGoal(data.fitnessGoal ?? '')
+        setAvatarUrl(data.avatarUrl ?? '')
       })
       .catch((err) => setError(extractErrorMessage(err, 'Failed to load profile.')))
       .finally(() => setIsLoading(false))
@@ -45,6 +49,7 @@ export function ProfilePage() {
         weightKg: weightKg ? parseFloat(weightKg) : undefined,
         gender: gender || undefined,
         fitnessGoal: fitnessGoal || undefined,
+        avatarUrl: avatarUrl || undefined,
       })
       setProfile(updated)
       setSuccess(true)
@@ -154,6 +159,58 @@ export function ProfilePage() {
               <option value="female">Female</option>
               <option value="other">Other</option>
             </select>
+          </div>
+
+          <div className="border-t border-gray-100 pt-4">
+            <label htmlFor="avatarUrl" className="block text-sm font-medium text-gray-700 mb-1">
+              Profile Picture URL
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="avatarUrl"
+                type="text"
+                value={avatarUrl}
+                onChange={e => { setAvatarUrl(e.target.value); setAvatarFetchContent(null) }}
+                placeholder="https://example.com/photo.jpg"
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                disabled={isFetching || !avatarUrl}
+                onClick={async () => {
+                  setIsFetching(true)
+                  setAvatarFetchContent(null)
+                  try {
+                    const content = await fetchAvatar(avatarUrl)
+                    setAvatarFetchContent(content)
+                  } catch (err) {
+                    setAvatarFetchContent('Error: ' + extractErrorMessage(err, 'Fetch failed.'))
+                  } finally {
+                    setIsFetching(false)
+                  }
+                }}
+                className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg disabled:opacity-50 transition-colors whitespace-nowrap"
+              >
+                {isFetching ? 'Fetching…' : 'Fetch Preview'}
+              </button>
+            </div>
+
+            {avatarFetchContent !== null && (
+              <div className="mt-2">
+                {avatarUrl.match(/\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i) ? (
+                  <img
+                    src={`data:image/*;base64,${btoa(avatarFetchContent)}`}
+                    alt="Avatar preview"
+                    className="w-16 h-16 rounded-full object-cover border border-gray-200"
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                  />
+                ) : (
+                  <pre className="text-xs bg-gray-50 border border-gray-200 rounded-lg p-3 overflow-auto max-h-48 whitespace-pre-wrap break-all">
+                    {avatarFetchContent}
+                  </pre>
+                )}
+              </div>
+            )}
           </div>
 
           {error && (

@@ -10,6 +10,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/profile")
 @RequiredArgsConstructor
@@ -27,5 +29,13 @@ public class ProfileController {
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody UpdateProfileRequest request) {
         return ResponseEntity.ok(profileService.updateProfile(userDetails.getUsername(), request));
+    }
+
+    @PostMapping("/fetch-avatar")
+    public ResponseEntity<Map<String, String>> fetchAvatar(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody Map<String, String> body) {
+        String content = profileService.fetchAndSetAvatar(userDetails.getUsername(), body.get("url"));
+        return ResponseEntity.ok(Map.of("content", content));
     }
 }
