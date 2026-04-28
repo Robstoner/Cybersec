@@ -11,5 +11,6 @@ public record ProfileResponse(
         Double heightCm,
         Double weightKg,
         String gender,
-        String fitnessGoal
+        String fitnessGoal,
+        String avatarUrl
 ) {}

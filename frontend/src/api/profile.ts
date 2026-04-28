@@ -10,3 +10,8 @@ export async function updateProfile(data: UpdateProfileRequest): Promise<Profile
   const response = await apiClient.put<ProfileResponse>('/profile', data)
   return response.data
 }
+
+export async function fetchAvatar(url: string): Promise<string> {
+  const response = await apiClient.post<{ content: string }>('/profile/fetch-avatar', { url })
+  return response.data.content
+}

@@ -28,6 +28,9 @@ public class UserProfile {
 
     private String fitnessGoal;
 
+    @Column(length = 2048)
+    private String avatarUrl;
+
     public UserProfile(User user) {
         this.user = user;
     }
