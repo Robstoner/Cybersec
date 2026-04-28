@@ -6,6 +6,7 @@ public record CommentResponse(
         Long id,
         String body,
         String author,
+        String authorAvatarUrl,
         LocalDateTime createdAt,
         boolean canDelete
 ) {}

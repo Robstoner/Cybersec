@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router'
 import { getUsers, updateUserRoles, deleteUser } from '../api/admin'
 import { extractErrorMessage } from '../utils/errors'
 import type { AdminUser } from '../types/admin'
+import { AppShell } from '../components/AppShell'
+import { Avatar } from '../components/Avatar'
 
 export function AdminPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
@@ -23,7 +24,6 @@ export function AdminPage() {
       ? user.roles.filter((r) => r !== 'ROLE_ADMIN')
       : [...user.roles, 'ROLE_ADMIN']
 
-    // Ensure at least ROLE_USER remains
     if (!newRoles.includes('ROLE_USER')) newRoles.push('ROLE_USER')
 
     try {
@@ -46,44 +46,53 @@ export function AdminPage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">Loading users…</p>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Admin Panel</h1>
-          <Link to="/" className="text-sm text-blue-600 hover:underline">Back to Dashboard</Link>
+    <AppShell maxWidth="wide">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Admin panel</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Manage users and their roles.</p>
         </div>
+        <span className="bg-purple-50 text-purple-700 ring-1 ring-purple-100 rounded-full px-3 py-1 text-xs font-medium">
+          {users.length} {users.length === 1 ? 'user' : 'users'}
+        </span>
+      </div>
 
-        {error && (
-          <p role="alert" className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 mb-4">{error}</p>
-        )}
+      {error && (
+        <p role="alert" className="text-sm text-red-600 bg-red-50 ring-1 ring-red-100 rounded-lg px-3 py-2">{error}</p>
+      )}
 
-        <div className="bg-white rounded-2xl shadow overflow-hidden">
+      {isLoading ? (
+        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-100 p-8 animate-pulse space-y-3">
+          <div className="h-10 bg-slate-100 rounded" />
+          <div className="h-10 bg-slate-100 rounded" />
+          <div className="h-10 bg-slate-100 rounded" />
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl shadow-sm ring-1 ring-slate-100 overflow-hidden">
           <table className="w-full text-sm text-left">
-            <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
+            <thead className="bg-slate-50 text-slate-500 uppercase text-xs">
               <tr>
-                <th className="px-4 py-3">ID</th>
-                <th className="px-4 py-3">Username</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">Roles</th>
-                <th className="px-4 py-3">Created</th>
-                <th className="px-4 py-3 text-right">Actions</th>
+                <th className="px-4 py-3 font-medium">User</th>
+                <th className="px-4 py-3 font-medium">Email</th>
+                <th className="px-4 py-3 font-medium">Roles</th>
+                <th className="px-4 py-3 font-medium">Joined</th>
+                <th className="px-4 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-slate-100">
               {users.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-400">{user.id}</td>
-                  <td className="px-4 py-3 font-medium text-gray-800">{user.username}</td>
-                  <td className="px-4 py-3 text-gray-600">{user.email}</td>
+                <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <Avatar username={user.username} size="sm" />
+                      <div>
+                        <p className="font-medium text-slate-800">{user.username}</p>
+                        <p className="text-xs text-slate-400">#{user.id}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-slate-600">{user.email}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1 flex-wrap">
                       {user.roles.map((role) => (
@@ -91,8 +100,8 @@ export function AdminPage() {
                           key={role}
                           className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                             role === 'ROLE_ADMIN'
-                              ? 'bg-purple-100 text-purple-700'
-                              : 'bg-blue-100 text-blue-700'
+                              ? 'bg-purple-50 text-purple-700 ring-1 ring-purple-100'
+                              : 'bg-slate-100 text-slate-700'
                           }`}
                         >
                           {role.replace('ROLE_', '')}
@@ -100,7 +109,7 @@ export function AdminPage() {
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-400">
+                  <td className="px-4 py-3 text-slate-500">
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -109,15 +118,15 @@ export function AdminPage() {
                         onClick={() => handleToggleAdmin(user)}
                         className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                           user.roles.includes('ROLE_ADMIN')
-                            ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
-                            : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                            ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 ring-1 ring-amber-100'
+                            : 'bg-purple-50 text-purple-700 hover:bg-purple-100 ring-1 ring-purple-100'
                         }`}
                       >
-                        {user.roles.includes('ROLE_ADMIN') ? 'Revoke Admin' : 'Make Admin'}
+                        {user.roles.includes('ROLE_ADMIN') ? 'Revoke admin' : 'Make admin'}
                       </button>
                       <button
                         onClick={() => handleDelete(user)}
-                        className="px-3 py-1 rounded-lg text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors"
+                        className="px-3 py-1 rounded-lg text-xs font-medium bg-red-50 text-red-700 hover:bg-red-100 ring-1 ring-red-100 transition-colors"
                       >
                         Delete
                       </button>
@@ -128,10 +137,10 @@ export function AdminPage() {
             </tbody>
           </table>
           {users.length === 0 && (
-            <p className="text-center text-gray-400 py-8">No users found.</p>
+            <p className="text-center text-slate-400 py-8">No users found.</p>
           )}
         </div>
-      </div>
-    </div>
+      )}
+    </AppShell>
   )
 }

@@ -130,12 +130,17 @@ public class PostService {
                     .map(c -> toCommentResponse(c, currentUser))
                     .toList();
         }
+        String authorAvatarUrl = post.getAuthor().getProfile() != null
+                ? post.getAuthor().getProfile().getAvatarUrl()
+                : null;
         return new PostResponse(
                 post.getId(),
                 post.getTitle(),
                 post.getBody(),
                 imageUrl,
                 post.getAuthor().getUsername(),
+                authorAvatarUrl,
+                post.getComments().size(),
                 post.getCreatedAt(),
                 canDelete(post, currentUser),
                 commentResponses
@@ -145,10 +150,14 @@ public class PostService {
     private CommentResponse toCommentResponse(Comment c, User currentUser) {
         boolean canDelete = currentUser != null
                 && (c.getAuthor().getId().equals(currentUser.getId()) || hasAdminRole(currentUser));
+        String avatarUrl = c.getAuthor().getProfile() != null
+                ? c.getAuthor().getProfile().getAvatarUrl()
+                : null;
         return new CommentResponse(
                 c.getId(),
                 c.getBody(),
                 c.getAuthor().getUsername(),
+                avatarUrl,
                 c.getCreatedAt(),
                 canDelete
         );

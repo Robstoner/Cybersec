@@ -13,6 +13,8 @@ public record PostResponse(
         String body,
         String imageUrl,
         String author,
+        String authorAvatarUrl,
+        int commentCount,
         LocalDateTime createdAt,
         boolean canDelete,
         List<CommentResponse> comments

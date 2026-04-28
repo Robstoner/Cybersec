@@ -6,6 +6,8 @@ export interface Post {
   body: string
   imageUrl: string | null
   author: string
+  authorAvatarUrl: string | null
+  commentCount: number
   createdAt: string
   canDelete: boolean
   comments: Comment[] | null

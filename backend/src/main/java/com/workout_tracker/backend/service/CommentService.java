@@ -44,6 +44,7 @@ public class CommentService {
                 saved.getId(),
                 saved.getBody(),
                 author.getUsername(),
+                author.getProfile() != null ? author.getProfile().getAvatarUrl() : null,
                 saved.getCreatedAt(),
                 true
         );
